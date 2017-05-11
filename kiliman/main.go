@@ -8,7 +8,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
-	middle "github.com/go-kiliman/middlewares"
+	middle "github.com/go-kiliman/kiliman/middlewares"
 	"github.com/gorilla/mux"
 	"golang.org/x/net/context"
 	"gopkg.in/mgo.v2"
