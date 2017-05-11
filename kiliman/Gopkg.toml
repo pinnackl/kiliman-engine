@@ -1,8 +1,0 @@
-
-[[dependencies]]
-  branch = "master"
-  name = "k8s.io/client-go"
-
-[[overrides]]
-  branch = "master"
-  name = "cloud.google.com/go"
