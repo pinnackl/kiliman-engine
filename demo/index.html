@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Everest Engine Demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.3.1/css/foundation.min.css">
+
+    <style>
+        body {
+            margin: auto;
+            width: 60%;
+        }
+
+        h1, p {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<h1>Bienvenue sur Kiliman Engine</h1>
+<p>Veuillez saisir les informations nécessaires à la création de votre cms.</p>
+
+<form id="cms-form" method="post" onsubmit="sendNewCms()">
+    <div class="row">
+        <div class="large-12 columns">
+            <label>
+                Email
+                <input type="email" name="email" placeholder="Votre adresse email" required/>
+            </label>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="large-6 columns">
+            <label>
+                Nom
+                <input type="text" name="last_name" placeholder="Votre nom" required/>
+            </label>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="large-12 columns">
+            <label>
+                Votre offre
+                <select name="offer" required>
+                    <option value="bronze">Bronze</option>
+                    <option value="silver">Silver</option>
+                    <option value="gold">Gold</option>
+                </select>
+            </label>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="large-12 columns">
+            <button type="submit" class="button">Create</button>
+        </div>
+    </div>
+</form>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
+<script>
+    const headers = new Headers()
+    headers.append('Content-Type', 'application/json')
+    headers.append('Accept', 'application/json.v1')
+
+    function sendNewCms() {
+        event.stopPropagation()
+        const form = document.forms['cms-form']
+        const newCmsBody = {name: form.last_name.value, email: form.email.value, offer:form.offer.value }
+
+        fetch("http://localhost:12345/new-cms", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify(newCmsBody)
+        })
+
+        return false
+    }
+
+</script>
+</body>
+</html>
