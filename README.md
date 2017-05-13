@@ -1,4 +1,4 @@
-# kiliman-engine
+# Kiliman Engine
 
 ## Docker
 
@@ -6,7 +6,7 @@
  
 ## HTML
 
-Plateform subscritpion (HTML / JS)
+Subscription plateform  (HTML / JS)
 
 ## Kiliman
 
