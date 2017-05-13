@@ -5,7 +5,7 @@
 # 'bind' controls which local interfaces will be listened on
 # 'port' controls which port will be listened on
 #------------------------------------------------------------------------------
-# bind = [ "192.168.33.1" ]
+# bind = [ "localhost" ]
 # port = 8181
 
 
@@ -25,7 +25,7 @@ secure = false
 #                application state
 # 'serve_static' will serve files from the given directory over HTTP/HTTPS
 #------------------------------------------------------------------------------
- project_name = "test-horizon"
+project_name = ""
 # serve_static = "dist"
 
 
@@ -48,7 +48,7 @@ auto_create_collection = true
 # 'connect' will connect to an existing RethinkDB instance
 # 'start_rethinkdb' will run an internal RethinkDB instance
 #------------------------------------------------------------------------------
-connect = "192.168.0.11:28015"
+connect = "127.0.0.1:28015"
 # start_rethinkdb = false
 
 
@@ -68,7 +68,7 @@ debug = true
 # 'allow_unauthenticated' allows connections that are not tied to a user id
 # 'auth_redirect' specifies where users will be redirected to after login
 #------------------------------------------------------------------------------
-token_secret = "9SXvItYZGUZgPzSGqHi/RweLwaV2RQW1FZ2EtyWn7tRDeyS95H9a9gNoYqzhTt8ewCjoUXDSbZKrly3rEMpjVw=="
+token_secret =
 allow_anonymous = true
 allow_unauthenticated = true
 # auth_redirect = "/"

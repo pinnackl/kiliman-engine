@@ -20,6 +20,7 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+	"io/ioutil"
 )
 
 type RequestCustomer struct {
@@ -101,7 +102,7 @@ func CreateContainerEndpoint(w http.ResponseWriter, req *http.Request) {
 		check(err)
 	}
 
-	go CreateDirectoryAndCopyConfFile(containerName)
+	CreateDirectoryAndCopyConfFile(containerName)
 
 	customer := &ResponseCustomer{
 		Name:           reqC.Name,
@@ -141,10 +142,6 @@ func exists(path string) (bool, error) {
 }
 
 func CreateDirectoryAndCopyConfFile(containerName string) {
-	srcHzFile, err := os.Open("./templates/.hz/config-dev.toml")
-	check(err)
-	defer srcHzFile.Close()
-
 	srcConfigFile, err := os.Open("./templates/config/config-dev.json")
 	check(err)
 	defer srcConfigFile.Close()
@@ -152,31 +149,42 @@ func CreateDirectoryAndCopyConfFile(containerName string) {
 	directoryConatinerPath := fmt.Sprintf("./srv/%s", containerName )
 	os.Mkdir(directoryConatinerPath, os.FileMode(0755))
 
-	directoryHzPath := fmt.Sprintf("%s/.hz", directoryConatinerPath )
+	directoryHzPath := fmt.Sprintf("%s/.hz", directoryConatinerPath)
 	os.Mkdir(directoryHzPath, os.FileMode(0755))
 
-	directoryConfigPath := fmt.Sprintf("%s/config", directoryConatinerPath )
+	directoryConfigPath := fmt.Sprintf("%s/config", directoryConatinerPath)
 	os.Mkdir(directoryConfigPath, os.FileMode(0755))
 
-	hzFilePath := fmt.Sprintf("%s/config-dev.toml", directoryHzPath)
-	destHzFile, err := os.Create(hzFilePath) // creates if file doesn't exist
-	check(err)
-	defer destHzFile.Close()
-
-	configFilePath := fmt.Sprintf("%s/config-dev.toml", directoryConfigPath)
+	configFilePath := fmt.Sprintf("%s/config-dev.json", directoryConfigPath)
 	destConfigFile, err := os.Create(configFilePath) // creates if file doesn't exist
 	check(err)
 	defer destConfigFile.Close()
-
-	_, err = io.Copy(destHzFile, srcHzFile) // check first var for number of bytes copied
-	check(err)
-	err = destHzFile.Sync()
-	check(err)
 
 	_, err = io.Copy(destConfigFile, srcConfigFile) // check first var for number of bytes copied
 	check(err)
 	err = destConfigFile.Sync()
 	check(err)
+
+	input, err := ioutil.ReadFile("./templates/.hz/config-dev.toml")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	lines := strings.Split(string(input), "\n")
+
+	for i, line := range lines {
+		if strings.Contains(line, "project_name =") {
+			lines[i] = "project_name = '" + containerName +"'"
+		}
+		if strings.Contains(line, "token_secret =") {
+			log.Println("coucou")
+			lines[i] = "token_secret = '" +  RandStringRunes(64) +"'"
+		}
+	}
+	output := strings.Join(lines, "\n")
+	err = ioutil.WriteFile(directoryHzPath+"/config-dev.toml", []byte(output), 0644)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 
 }
