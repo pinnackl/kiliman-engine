@@ -93,6 +93,16 @@ func CreateContainerEndpoint(w http.ResponseWriter, req *http.Request) {
 	tmp_containerName := strings.Replace(tmp_name_container, "/", "", 1)
 	containerName := strings.Replace(tmp_containerName, "\n", "", 2)
 
+	val, err := exists("./srv")
+	check(err)
+
+	if !val {
+		err := os.Mkdir("./srv", os.FileMode(0755))
+		check(err)
+	}
+
+	go CreateDirectoryAndCopyConfFile(containerName)
+
 	customer := &ResponseCustomer{
 		Name:           reqC.Name,
 		Email:          reqC.Email,
@@ -121,6 +131,61 @@ func RandStringRunes(n int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+func exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil { return true, nil }
+	if os.IsNotExist(err) { return false, nil }
+	return true, err
+}
+
+func CreateDirectoryAndCopyConfFile(containerName string) {
+	srcHzFile, err := os.Open("./templates/.hz/config-dev.toml")
+	check(err)
+	defer srcHzFile.Close()
+
+	srcConfigFile, err := os.Open("./templates/config/config-dev.json")
+	check(err)
+	defer srcConfigFile.Close()
+
+	directoryConatinerPath := fmt.Sprintf("./srv/%s", containerName )
+	os.Mkdir(directoryConatinerPath, os.FileMode(0755))
+
+	directoryHzPath := fmt.Sprintf("%s/.hz", directoryConatinerPath )
+	os.Mkdir(directoryHzPath, os.FileMode(0755))
+
+	directoryConfigPath := fmt.Sprintf("%s/config", directoryConatinerPath )
+	os.Mkdir(directoryConfigPath, os.FileMode(0755))
+
+	hzFilePath := fmt.Sprintf("%s/config-dev.toml", directoryHzPath)
+	destHzFile, err := os.Create(hzFilePath) // creates if file doesn't exist
+	check(err)
+	defer destHzFile.Close()
+
+	configFilePath := fmt.Sprintf("%s/config-dev.toml", directoryConfigPath)
+	destConfigFile, err := os.Create(configFilePath) // creates if file doesn't exist
+	check(err)
+	defer destConfigFile.Close()
+
+	_, err = io.Copy(destHzFile, srcHzFile) // check first var for number of bytes copied
+	check(err)
+	err = destHzFile.Sync()
+	check(err)
+
+	_, err = io.Copy(destConfigFile, srcConfigFile) // check first var for number of bytes copied
+	check(err)
+	err = destConfigFile.Sync()
+	check(err)
+
+
+}
+
+func check(err error) {
+	if err != nil {
+		fmt.Println("Error : %s", err.Error())
+		os.Exit(1)
+	}
 }
 
 func RunContainerInBackground(imageName string) string {
