@@ -1,7 +1,7 @@
 {
   "db": {
     "mongo": {
-      "url": "mongodb://192.168.0.11:27017"
+      "url": "mongodb://127.0.0.1:27017"
     }
   },
   "security": {
