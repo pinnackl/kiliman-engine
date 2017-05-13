@@ -13,7 +13,7 @@
 
 ## Running
 
- - `./kiliman # Listens on 12345`
+ - `./kiliman # Listen on port 12345`
 
 
 ## Example Curl
