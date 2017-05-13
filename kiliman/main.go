@@ -146,13 +146,13 @@ func CreateDirectoryAndCopyConfFile(containerName string) {
 	check(err)
 	defer srcConfigFile.Close()
 
-	directoryConatinerPath := fmt.Sprintf("./srv/%s", containerName )
-	os.Mkdir(directoryConatinerPath, os.FileMode(0755))
+	directoryContainerPath := fmt.Sprintf("./srv/%s", containerName )
+	os.Mkdir(directoryContainerPath, os.FileMode(0755))
 
-	directoryHzPath := fmt.Sprintf("%s/.hz", directoryConatinerPath)
+	directoryHzPath := fmt.Sprintf("%s/.hz", directoryContainerPath)
 	os.Mkdir(directoryHzPath, os.FileMode(0755))
 
-	directoryConfigPath := fmt.Sprintf("%s/config", directoryConatinerPath)
+	directoryConfigPath := fmt.Sprintf("%s/config", directoryContainerPath)
 	os.Mkdir(directoryConfigPath, os.FileMode(0755))
 
 	configFilePath := fmt.Sprintf("%s/config-dev.json", directoryConfigPath)
