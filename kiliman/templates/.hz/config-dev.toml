@@ -5,8 +5,8 @@
 # 'bind' controls which local interfaces will be listened on
 # 'port' controls which port will be listened on
 #------------------------------------------------------------------------------
-# bind = [ "localhost" ]
-# port = 8181
+bind = [ "localhost" ]
+port = 8181
 
 
 ###############################################################################
@@ -25,7 +25,7 @@ secure = false
 #                application state
 # 'serve_static' will serve files from the given directory over HTTP/HTTPS
 #------------------------------------------------------------------------------
-project_name = ""
+project_name = "test-titou"
 # serve_static = "dist"
 
 
@@ -48,7 +48,7 @@ auto_create_collection = true
 # 'connect' will connect to an existing RethinkDB instance
 # 'start_rethinkdb' will run an internal RethinkDB instance
 #------------------------------------------------------------------------------
-connect = "127.0.0.1:28015"
+connect = "127.0.0.1:29015"
 # start_rethinkdb = false
 
 

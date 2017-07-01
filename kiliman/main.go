@@ -14,13 +14,15 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"io"
+	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
-	"io/ioutil"
+
+	"github.com/docker/go-connections/nat"
 )
 
 type RequestCustomer struct {
@@ -76,7 +78,7 @@ func CreateContainerEndpoint(w http.ResponseWriter, req *http.Request) {
 	switch reqC.Offer {
 
 	case "bronze":
-		idContainer = RunContainerInBackground("alpine")
+		idContainer = RunContainerInBackground("pinnackl/kiliman-horizon:1.3")
 	case "silver":
 		idContainer = RunContainerInBackground("debian")
 	case "gold":
@@ -102,7 +104,7 @@ func CreateContainerEndpoint(w http.ResponseWriter, req *http.Request) {
 		check(err)
 	}
 
-	CreateDirectoryAndCopyConfFile(containerName)
+	go CreateDirectoryAndCopyConfFile(containerName)
 
 	customer := &ResponseCustomer{
 		Name:           reqC.Name,
@@ -136,17 +138,21 @@ func RandStringRunes(n int) string {
 
 func exists(path string) (bool, error) {
 	_, err := os.Stat(path)
-	if err == nil { return true, nil }
-	if os.IsNotExist(err) { return false, nil }
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
 	return true, err
 }
 
 func CreateDirectoryAndCopyConfFile(containerName string) {
-	srcConfigFile, err := os.Open("./templates/config/config-dev.json")
+	srcConfigFile, err := os.Open("templates/config/config-dev.json")
 	check(err)
 	defer srcConfigFile.Close()
 
-	directoryContainerPath := fmt.Sprintf("./srv/%s", containerName )
+	directoryContainerPath := fmt.Sprintf("./srv/%s", containerName)
 	os.Mkdir(directoryContainerPath, os.FileMode(0755))
 
 	directoryHzPath := fmt.Sprintf("%s/.hz", directoryContainerPath)
@@ -165,7 +171,7 @@ func CreateDirectoryAndCopyConfFile(containerName string) {
 	err = destConfigFile.Sync()
 	check(err)
 
-	input, err := ioutil.ReadFile("./templates/.hz/config-dev.toml")
+	input, err := ioutil.ReadFile("templates/.hz/config-dev.toml")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -173,11 +179,11 @@ func CreateDirectoryAndCopyConfFile(containerName string) {
 
 	for i, line := range lines {
 		if strings.Contains(line, "project_name =") {
-			lines[i] = "project_name = '" + containerName +"'"
+			lines[i] = "project_name = '" + containerName + "'"
 		}
 		if strings.Contains(line, "token_secret =") {
 			log.Println("coucou")
-			lines[i] = "token_secret = '" +  RandStringRunes(64) +"'"
+			lines[i] = "token_secret = '" + RandStringRunes(64) + "'"
 		}
 	}
 	output := strings.Join(lines, "\n")
@@ -185,7 +191,6 @@ func CreateDirectoryAndCopyConfFile(containerName string) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 
 }
 
@@ -209,9 +214,28 @@ func RunContainerInBackground(imageName string) string {
 	}
 	io.Copy(os.Stdout, out)
 
+	volumesToMount := []string{
+		//"/var/run", "/var/run:rw",
+		//"/sys", "/sys:ro",
+		//"/var/lib/docker/", "/var/lib/docker:ro"
+	}
+
+	PortsBindings := []nat.PortBinding{
+		{HostIP: "0.0.0.0", HostPort: "8080"},
+	}
+
+	PortsBindingsMap := nat.PortMap{
+		nat.PortBinding{"0.0.0.0", "8080"},
+	}
+
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image: imageName,
-	}, nil, nil, "")
+	}, &container.HostConfig{
+		PortBindings: PortsBindingsMap,
+		Privileged: false,
+		VolumesFrom: volumesToMount,
+
+	}, nil, "")
 	if err != nil {
 		panic(err)
 	}
@@ -238,9 +262,9 @@ func insertInDB(customer ResponseCustomer) {
 	c := session.DB("test-go").C("customer-cms")
 
 	err = c.Insert(&Customer{bson.NewObjectId(), customer.Name,
-				customer.Ip_address, customer.Container_name,
-				customer.Path, customer.Offer, customer.Email,
-				customer.Api_Key,time.Now()})
+		customer.Ip_address, customer.Container_name,
+		customer.Path, customer.Offer, customer.Email,
+		customer.Api_Key, time.Now()})
 	if err != nil {
 		log.Fatal(err)
 	}
