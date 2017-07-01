@@ -7,7 +7,8 @@ WORKDIR /srv/horizon
 RUN npm install
 ADD . /srv/horizon
 
+EXPOSE 8181
+EXPOSE 28015
 
-EXPOSE 8080
 CMD []
 ENTRYPOINT ["node", "index.js"]

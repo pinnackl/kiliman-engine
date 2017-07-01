@@ -1,0 +1,19 @@
+version: "2"
+
+services:
+  redthinkdb:
+    image: rethinkdb:latest
+    ports:
+      - "8080:8080"
+      - "29015:28015"
+  horizon:
+    image: pinnackl/kiliman-horizon:1.4
+    volumes:
+      - ./srv/horizon/.hz/:/srv/horizon/.hz
+      - ./srv/horizon/config/:/srv/horizon/config
+    links:
+      - redthinkdb
+    ports:
+      - "8181:8181"
+    tty: true
+
