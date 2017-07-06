@@ -27,7 +27,7 @@ secure = false
 # 'serve_static' will serve files from the given directory over HTTP/HTTPS
 #------------------------------------------------------------------------------
 
-project_name = "testhorizontitou"
+project_name = "titouhorizon124449"
 # serve_static = "dist"
 
 
@@ -54,7 +54,7 @@ auto_create_collection = true
 
 #start_rethinkdb = true
 
-rdb_host="192.168.0.11"
+rdb_host="172.16.21.75"
 rdb_port=28015
 rdb_user="admin"
 #rdb_password=""
