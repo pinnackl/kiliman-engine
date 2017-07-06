@@ -16,4 +16,10 @@ services:
     ports:
       - "8181:8181"
     tty: true
+  chateau:
+    image: antoinehumbert/chateau:1.0
+    ports:
+      - "3000:3000"
+    links:
+      - redthinkdb
 
