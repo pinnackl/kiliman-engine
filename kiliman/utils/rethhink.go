@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"log"
 	r "gopkg.in/gorethink/gorethink.v3"
 	"github.com/go-kiliman/kiliman/config"
@@ -37,7 +36,7 @@ func CreateAndGrantUserInDB(Db_name string, idUser string, userPassword string) 
 		Password: userPassword,
 	})
 
-	fmt.Println("user Granted in DB " + Db_name)
+	log.Println("User Granted for DB " + Db_name)
 }
 
 
