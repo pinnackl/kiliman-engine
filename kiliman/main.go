@@ -156,6 +156,9 @@ func RunContainerInBackground(imageName string, containerName string, idUser str
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image:   imageName,
 		Volumes: volumes,
+		Env: []string{
+			"VIRTUAL_HOST=titou3.com",
+		},
 	}, &container.HostConfig{
 		Binds: []string{
 			os.Getenv("PWD") + "/srv/" + containerName + "/.hz/config-dev.toml:/srv/horizon/.hz/config-dev.toml",

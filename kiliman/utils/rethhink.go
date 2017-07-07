@@ -10,7 +10,7 @@ import (
 func CreateAndGrantUserInDB(Db_name string, idUser string, userPassword string) {
 
 	session, err := r.Connect(r.ConnectOpts{
-		Address: config.CNF["IP_HOST"]+":28015",
+		Address: config.CNF["IP_HOST"]+":29015",
 	})
 
 	resp, err := r.DBCreate(Db_name).RunWrite(session)
@@ -23,6 +23,7 @@ func CreateAndGrantUserInDB(Db_name string, idUser string, userPassword string) 
 	err = r.DB(Db_name).Grant(idUser, map[string]bool{
 		"read":  true,
 		"write": true,
+		"config": true,
 	}).Exec(session)
 
 	if err != nil {
@@ -30,7 +31,7 @@ func CreateAndGrantUserInDB(Db_name string, idUser string, userPassword string) 
 	}
 
 	_, err = r.Connect(r.ConnectOpts{
-		Address:  config.CNF["IP_HOST"]+":28015",
+		Address:  config.CNF["IP_HOST"]+":29015",
 		Database: Db_name,
 		Username: idUser,
 		Password: userPassword,
@@ -44,7 +45,7 @@ func CreateAndGrantUserInDB(Db_name string, idUser string, userPassword string) 
 func InsertUserInRethinkDB(idUser string, userPassword string) {
 
 	session, err := r.Connect(r.ConnectOpts{
-		Address: config.CNF["IP_HOST"]+":28015",
+		Address: config.CNF["IP_HOST"]+":29015",
 	})
 
 	err = r.DB("rethinkdb").Table("users").Insert(map[string]string{
