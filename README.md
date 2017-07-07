@@ -1,5 +1,9 @@
 # Kiliman Engine
 
+## Ansible
+
+ Deploy kiliman-engine on server
+
 ## Docker
 
  Dockerfile (nodeJs + kiliman-horizon)
@@ -10,4 +14,4 @@ Subscription plateform  (HTML / JS)
 
 ## Kiliman
 
-Kiliman engine (go)
+  Kiliman engine API (go)
