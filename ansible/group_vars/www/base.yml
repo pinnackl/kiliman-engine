@@ -3,13 +3,15 @@ base_timezone: "Europe/Paris"
 
 base_packages:
   - apt-transport-https
+  - ca-certificates
+  - tmux
 
 base_hosts: []
 #  - "127.0.0.1  me.local"
 
 base_swap: false
-base_swap_size: 1024 #MB
-base_swap_location: "/swap.bin"
+base_swap_size:  #MB
+base_swap_location: ""
 
 base_directories: []
 #  - path: /var/cache/nginx/mysite
@@ -38,12 +40,9 @@ base_sysctl_present: []
 ## delete these sysctl entries
 base_sysctl_absent: []
 
-base_users: []
-# - name: nameuser
-#   password: 'password'
+base_users:
+  - name: kiliman
+    password: "lLKbfRTg"
 
-base_directories: []
-#  - path: /var/cache/nginx/mysite
-#    owner: 33 # webserver reserved uid
-#    group: 33
+
 base_groups: []

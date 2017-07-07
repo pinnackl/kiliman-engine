@@ -1,6 +1,0 @@
----
-- name: create groups
-  group:
-    name: "{{ item.name }}" 
-    gid: "{{ item.gid }}" 
-    state: present

@@ -7,5 +7,3 @@
     createhome: "{{ item.createhome | default(omit) }}" 
     home: "{{ item.home | default(omit) }}"
     non_unique: yes
-    shell: "{{ item.shell | default('omit') }}"
-    group: "{{ item.group | default('omit')}}"

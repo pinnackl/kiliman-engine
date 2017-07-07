@@ -1,3 +1,3 @@
 ---
-env_domain_name: "localhost" #
-env_password_user_sofinco: "$6$iQp1wD2UQAv$ZDukPcxFxD0MhobQ.FzB6CMX1115QFgRktVbdDHvsgX37jZvUqWdvBX9wHk4.TH0mAWVczKy3il9/cHzQCtbN." #mkpasswd --method=sha-512 (anpyntOcJijrysghipUz)
+env_domain_name: "titoutest.com"
+env_password_user_kiliman: "$6$iQp1wD2UQAv$ZDukPcxFxD0MhobQ.FzB6CMX1115QFgRktVbdDHvsgX37jZvUqWdvBX9wHk4.TH0mAWVczKy3il9/cHzQCtbN." #mkpasswd --method=sha-512 (anpyntOcJijrysghipUz)

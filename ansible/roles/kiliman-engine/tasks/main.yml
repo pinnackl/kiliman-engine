@@ -1,0 +1,6 @@
+---
+- include: install.yml
+  tags:
+    - kiliman-engine
+    - install
+    - kiliman-engine-install

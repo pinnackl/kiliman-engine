@@ -1,0 +1,7 @@
+---
+- name: clone website git repository
+  git:
+    repo: "{{ kiliman_engine_url_git }}"
+    version: master
+    dest: /srv/kiliman-engine
+    clone: yes
