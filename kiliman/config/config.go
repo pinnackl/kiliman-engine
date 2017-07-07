@@ -5,7 +5,7 @@ import (
 )
 
 var CNF = map[string]string{
-	"IP_HOST": "172.16.21.69",
+	"IP_HOST": "163.172.182.154",
 }
 
 func init() {

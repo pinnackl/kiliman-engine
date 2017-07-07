@@ -185,7 +185,6 @@ func CreateDirectoryAndCopyConfFile(containerName string, idUser string, Db_pass
 	utils.Check(err)
 	defer srcConfigFile.Close()
 
-	fmt.Println("create directpry")
 	directoryContainerPath := fmt.Sprintf(os.Getenv("PWD")+"/srv/%s", containerName)
 	os.Mkdir(directoryContainerPath, os.FileMode(0755))
 
@@ -198,10 +197,7 @@ func CreateDirectoryAndCopyConfFile(containerName string, idUser string, Db_pass
 
 	configFilePath := fmt.Sprintf("%s/config-dev.json", directoryConfigPath)
 	destConfigFile, err := os.Create(configFilePath) // creates if file doesn't exist
-	//utils.Check(err)
-
-	fmt.Println("create config")
-
+	utils.Check(err)
 
 	defer destConfigFile.Close()
 
@@ -241,7 +237,7 @@ func CreateDirectoryAndCopyConfFile(containerName string, idUser string, Db_pass
 		log.Println(err)
 	}
 
-	fmt.Println("directory create")
+	log.Println("Directory created")
 }
 
 func insertInDB(customer ResponseCustomer) {
@@ -253,7 +249,7 @@ func insertInDB(customer ResponseCustomer) {
 
 	session.SetMode(mgo.Monotonic, true)
 
-	c := session.DB("test-go").C("customer-cms")
+	c := session.DB("go-kiliman").C("customer-cms")
 
 	err = c.Insert(&Customer{bson.NewObjectId(), customer.Name,
 		customer.Ip_address, customer.Container_name,
