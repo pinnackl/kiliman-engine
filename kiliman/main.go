@@ -102,14 +102,6 @@ func CreateContainerEndpoint(w http.ResponseWriter, req *http.Request) {
 	tmp_containerName := strings.Replace(tmp_name_container, "/", "", 1)
 	containerName = strings.Replace(tmp_containerName, "\n", "", 2)
 
-	val, err := utils.Exists("./srv")
-	utils.Check(err)
-
-	if !val {
-		err := os.Mkdir("./srv", os.FileMode(0755))
-		utils.Check(err)
-	}
-
 	customer := &ResponseCustomer{
 		Name:           reqC.Name,
 		Email:          reqC.Email,
@@ -180,6 +172,15 @@ func RunContainerInBackground(imageName string, containerName string, idUser str
 }
 
 func CreateDirectoryAndCopyConfFile(containerName string, idUser string, Db_password string) {
+
+	val, err := utils.Exists("./srv")
+	utils.Check(err)
+
+	if !val {
+		err := os.Mkdir("./srv", os.FileMode(0755))
+		utils.Check(err)
+	}
+
 	srcConfigFile, err := os.Open("templates/config/config-dev.json")
 	utils.Check(err)
 	defer srcConfigFile.Close()

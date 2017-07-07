@@ -5,6 +5,10 @@ base_packages:
   - apt-transport-https
   - ca-certificates
   - tmux
+  - curl
+  - gnupg2
+  - software-properties-common
+  - python-pip
 
 base_hosts: []
 #  - "127.0.0.1  me.local"
