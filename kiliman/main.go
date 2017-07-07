@@ -15,14 +15,13 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"io"
 	"io/ioutil"
-	"math/rand"
+
+	"github.com/go-kiliman/kiliman/utils"
 	"net/http"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
-	r "gopkg.in/gorethink/gorethink.v3"
-
 )
 
 type RequestCustomer struct {
@@ -75,27 +74,22 @@ func CreateContainerEndpoint(w http.ResponseWriter, req *http.Request) {
 	_ = json.NewDecoder(req.Body).Decode(&reqC)
 
 	defer req.Body.Close()
-	log.Println(reqC)
 
-	containerName := RandomPassword(12)
-	fmt.Println(containerName)
-	userPasswordDb := RandomPassword(22)
-	insertUserInRethinkDB(reqC.Name, userPasswordDb)
-	CreateAndGrantUserInDB(containerName, reqC.Name, userPasswordDb)
+	containerName := utils.RandomPassword(12)
+	log.Println("Container Name : " + containerName)
+	userPasswordDb := utils.RandomPassword(22)
+
+	utils.InsertUserInRethinkDB(reqC.Name, userPasswordDb)
+	utils.CreateAndGrantUserInDB(containerName, reqC.Name, userPasswordDb)
 
 	switch reqC.Offer {
 		case "bronze":
-			fmt.Println("bronze case")
 			idContainer = RunContainerInBackground("antoinehumbert/kiliman-horizon:1.0", containerName, reqC.Name, userPasswordDb)
 		case "silver":
-			fmt.Println("Silver case")
-			//idContainer = RunContainerInBackground("debian")
+			idContainer = RunContainerInBackground("antoinehumbert/kiliman-horizon:1.0", containerName, reqC.Name, userPasswordDb)
 		case "gold":
-			fmt.Println("bronze case")
-		//idContainer = RunContainerInBackground("portainer/portainer")
+			idContainer = RunContainerInBackground("antoinehumbert/kiliman-horizon:1.0", containerName, reqC.Name, userPasswordDb)
 	}
-
-
 
 	cmdStr := "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' " + idContainer
 	out, _ := exec.Command("/bin/sh", "-c", cmdStr).Output()
@@ -108,12 +102,12 @@ func CreateContainerEndpoint(w http.ResponseWriter, req *http.Request) {
 	tmp_containerName := strings.Replace(tmp_name_container, "/", "", 1)
 	containerName = strings.Replace(tmp_containerName, "\n", "", 2)
 
-	val, err := exists("./srv")
-	check(err)
+	val, err := utils.Exists("./srv")
+	utils.Check(err)
 
 	if !val {
 		err := os.Mkdir("./srv", os.FileMode(0755))
-		check(err)
+		utils.Check(err)
 	}
 
 	customer := &ResponseCustomer{
@@ -123,175 +117,58 @@ func CreateContainerEndpoint(w http.ResponseWriter, req *http.Request) {
 		Container_name: containerName,
 		Path:           containerName,
 		Offer:          reqC.Offer,
-		Api_Key:        RandomPassword(64),
+		Api_Key:        utils.RandomPassword(64),
 		Db_password:    userPasswordDb,
 	}
 
 	go insertInDB(*customer)
 
 	if err := json.NewEncoder(w).Encode(customer); err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	log.Println("Response Send")
-
-}
-
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-const (
-	letterIdxBits = 6
-	letterIdxMask = 1<<letterIdxBits - 1
-	letterIdxMax  = 63 / letterIdxBits
-)
-
-var src = rand.NewSource(time.Now().UnixNano())
-
-func RandomPassword(n int) string {
-	b := make([]byte, n)
-	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
-		if remain == 0 {
-			cache, remain = src.Int63(), letterIdxMax
-		}
-
-		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
-			b[i] = letterBytes[idx]
-			i--
-		}
-
-		cache >>= letterIdxBits
-		remain--
-	}
-
-	return string(b)
-}
-
-
-func exists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return true, err
-}
-
-func insertUserInRethinkDB(idUser string, userPassword string) {
-
-	fmt.Println("insert user in rethinkdb")
-	session, err := r.Connect(r.ConnectOpts{
-		Address: "172.16.21.75:28015",
-		//Database: "titouhorizon19",
-		//Username: "john",
-		//Password: "p455w0rd",
-	})
-
-
-	err = r.DB("rethinkdb").Table("users").Insert(map[string]string{
-		"id": idUser,
-		"password": userPassword,
-	}).Exec(session)
-
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-
-
-	if err != nil {
-
-		log.Fatalln(err.Error())
-	}
-
-	fmt.Println("user : " +  idUser + " insert in rethinkDb and password : "+ userPassword)
-
-}
-
-func CreateAndGrantUserInDB(Db_name string, idUser string, userPassword string) {
-
-	session, err := r.Connect(r.ConnectOpts{
-		Address: "172.16.21.75:28015",
-	})
-
-	resp, err := r.DBCreate(Db_name).RunWrite(session)
-	if err != nil {
-		fmt.Print(err)
-	}
-
-	fmt.Printf("%d DB created", resp.DBsCreated)
-
-	err = r.DB(Db_name).Grant(idUser, map[string]bool{
-		"read": true,
-		"write": true,
-	}).Exec(session)
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	sessionBis, err := r.Connect(r.ConnectOpts{
-		Address: "172.16.21.75:28015",
-		Database: Db_name,
-		Username: idUser,
-		Password: userPassword,
-	})
-
-	fmt.Println(sessionBis)
-
-	fmt.Println("user Granted in DB " + Db_name)
-}
-
-
-
-func check(err error) {
-	if err != nil {
-		log.Println("Error : %s", err.Error())
-		os.Exit(1)
-	}
 }
 
 func RunContainerInBackground(imageName string, containerName string, idUser string, Db_password string) string {
 
 	CreateDirectoryAndCopyConfFile(containerName, idUser, Db_password)
 
-	//time.Sleep(2000)
+	time.Sleep(6000)
 
 	ctx := context.Background()
 	cli, err := client.NewEnvClient()
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	out, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	io.Copy(os.Stdout, out)
 
 	volumes := map[string]struct{}{
-		"/Users/titou/Projets/go/src/github.com/go-kiliman/kiliman/srv/"+containerName+"/.hz/config-dev.toml": {},
-		"/Users/titou/Projets/go/src/github.com/go-kiliman/kiliman/srv/"+containerName+"/config/config-dev.json": {},
+		os.Getenv("PWD") + "/srv/" + containerName + "/.hz/config-dev.toml":    {},
+		os.Getenv("PWD") + "/srv/" + containerName + "/config/config-dev.json": {},
 	}
 
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
-		Image: imageName,
+		Image:   imageName,
 		Volumes: volumes,
 	}, &container.HostConfig{
 		Binds: []string{
-			"/Users/titou/Projets/go/src/github.com/go-kiliman/kiliman/srv/"+containerName+"/.hz/config-dev.toml:/srv/horizon/.hz/config-dev.toml",
-			"/Users/titou/Projets/go/src/github.com/go-kiliman/kiliman/srv/"+containerName+"/config/config-dev.json:/srv/horizon/config/config-dev.json",
+			os.Getenv("PWD") + "/srv/" + containerName + "/.hz/config-dev.toml:/srv/horizon/.hz/config-dev.toml",
+			os.Getenv("PWD") + "/srv/" + containerName + "/config/config-dev.json:/srv/horizon/config/config-dev.json",
 		},
 	}, nil, containerName)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
 	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
-
 
 	log.Println("Container is runnig")
 
@@ -299,13 +176,13 @@ func RunContainerInBackground(imageName string, containerName string, idUser str
 
 }
 
-
 func CreateDirectoryAndCopyConfFile(containerName string, idUser string, Db_password string) {
 	srcConfigFile, err := os.Open("templates/config/config-dev.json")
-	check(err)
+	utils.Check(err)
 	defer srcConfigFile.Close()
 
-	directoryContainerPath := fmt.Sprintf("./srv/%s", containerName)
+	fmt.Println("create directpry")
+	directoryContainerPath := fmt.Sprintf(os.Getenv("PWD")+"/srv/%s", containerName)
 	os.Mkdir(directoryContainerPath, os.FileMode(0755))
 
 	directoryHzPath := fmt.Sprintf("%s/.hz", directoryContainerPath)
@@ -314,15 +191,20 @@ func CreateDirectoryAndCopyConfFile(containerName string, idUser string, Db_pass
 	directoryConfigPath := fmt.Sprintf("%s/config", directoryContainerPath)
 	os.Mkdir(directoryConfigPath, os.FileMode(0755))
 
+
 	configFilePath := fmt.Sprintf("%s/config-dev.json", directoryConfigPath)
 	destConfigFile, err := os.Create(configFilePath) // creates if file doesn't exist
-	check(err)
+	//utils.Check(err)
+
+	fmt.Println("create config")
+
+
 	defer destConfigFile.Close()
 
 	_, err = io.Copy(destConfigFile, srcConfigFile) // check first var for number of bytes copied
-	check(err)
+	utils.Check(err)
 	err = destConfigFile.Sync()
-	check(err)
+	utils.Check(err)
 
 	input, err := ioutil.ReadFile("templates/.hz/config-dev.toml")
 	if err != nil {
@@ -335,7 +217,7 @@ func CreateDirectoryAndCopyConfFile(containerName string, idUser string, Db_pass
 			lines[i] = "project_name = '" + containerName + "'"
 		}
 		if strings.Contains(line, "token_secret =") {
-			lines[i] = "token_secret = '" + RandomPassword(64) + "'"
+			lines[i] = "token_secret = '" + utils.RandomPassword(64) + "'"
 		}
 
 		if strings.Contains(line, "rdb_user=") {
@@ -361,7 +243,7 @@ func CreateDirectoryAndCopyConfFile(containerName string, idUser string, Db_pass
 func insertInDB(customer ResponseCustomer) {
 	session, err := mgo.Dial("localhost")
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	defer session.Close()
 

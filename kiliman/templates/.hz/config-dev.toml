@@ -51,7 +51,7 @@ auto_create_collection = true
 #connect = "127.0.0.1:29015"
 # start_rethinkdb = false
 
-rdb_host="172.16.21.75"
+rdb_host="172.16.21.69"
 rdb_port=28015
 rdb_user="admin"
 rdb_password=""
