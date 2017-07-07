@@ -1,0 +1,49 @@
+---
+base_timezone: "Europe/Paris"
+
+base_packages:
+  - apt-transport-https
+
+base_hosts: []
+#  - "127.0.0.1  me.local"
+
+base_swap: false
+base_swap_size: 1024 #MB
+base_swap_location: "/swap.bin"
+
+base_directories: []
+#  - path: /var/cache/nginx/mysite
+#    owner: 33 # webserver reserved uid
+#    group: 33
+
+base_mounts: []
+#  - disk: /dev/sdb
+#    mount: /var/lib/postgresql
+#    format: ext4
+#    #owner: postgres
+#    #group: postgres
+    
+base_glusterfs_mounts: []
+#  - mount: /opt/test
+#    server: "{{groups['glusterfs'][0]}}"
+#    volume: test
+#    chwn_user: www-data
+#    chwn_group: www-data
+
+## add sysctl entries
+base_sysctl_present: []
+#  - {key: "vm.swappiness", value: "5"}
+#  - {key: "vm.drop_caches", value: "1"}
+
+## delete these sysctl entries
+base_sysctl_absent: []
+
+base_users: []
+# - name: nameuser
+#   password: 'password'
+
+base_directories: []
+#  - path: /var/cache/nginx/mysite
+#    owner: 33 # webserver reserved uid
+#    group: 33
+base_groups: []

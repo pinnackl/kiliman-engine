@@ -1,0 +1,8 @@
+---
+- hosts: www
+  become: true
+  vars_files:
+   - "../env_vars/{{env}}.yml"
+  roles:
+    - base
+    - docker

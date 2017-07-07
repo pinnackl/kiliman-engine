@@ -1,0 +1,31 @@
+base_packages:
+  - sudo
+  - git
+  - subversion
+  - wget
+  - strace
+  - sysstat
+  - iotop
+  - lsof
+  - tree
+  - net-tools
+  - procps
+  - vim
+  - rsyslog
+  - logrotate
+  - unzip
+  - policycoreutils-python
+  - tcl
+
+base_remove_packages:
+  - mariadb-libs
+
+base_users: []
+# - name: nameuser
+#   password: 'password'
+
+base_directories: []
+#  - path: /var/cache/nginx/mysite
+#    owner: 33 # webserver reserved uid
+#    group: 33
+base_groups: []

@@ -1,0 +1,27 @@
+---
+- include: install.yml
+  tags:
+    - base
+    - install
+    - base-install
+
+- include: groups.yml
+  with_items: "{{base_groups}}"
+  tags:
+    - groups
+    - install
+    - groups-install
+
+- include: users.yml
+  with_items: "{{base_users}}"
+  tags:
+    - users
+    - install
+    - users-install
+
+- include: directories.yml
+  with_items: "{{base_directories}}"
+  tags:
+    - directories
+    - install
+    - directories-install

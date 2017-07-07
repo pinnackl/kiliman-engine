@@ -1,0 +1,14 @@
+---
+- name: install packages
+  yum:
+    name: "{{item}}"
+    state: present
+    update_cache: yes
+  with_items: "{{base_packages}}"
+
+- name: remove packages
+  yum:
+    name: "{{item}}"
+    state: absent
+    update_cache: yes
+  with_items: "{{base_remove_packages}}"

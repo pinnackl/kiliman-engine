@@ -1,0 +1,8 @@
+---
+- name: create directories
+  file:
+    path: "{{item.path}}"
+    owner: "{{item.owner}}"
+    group: "{{item.group}}"
+    state: directory
+    recurse: true
