@@ -4,4 +4,5 @@
     repo: "{{ kiliman_engine_url_git }}"
     version: master
     dest: /srv/kiliman-engine
+    update: yes
     clone: yes
