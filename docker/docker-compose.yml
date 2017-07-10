@@ -11,14 +11,14 @@ services:
   redthinkdb:
     image: rethinkdb:latest
     environment:
-      - VIRTUAL_HOST=titou4.com
+      - VIRTUAL_HOST=163.172.182.154/rethink
     ports:
       - "8080:8080"
       - "29015:28015"
   horizon:
     image: antoinehumbert/kiliman-horizon:1.0
     environment:
-      - VIRTUAL_HOST=titou1.com
+      - VIRTUAL_HOST=163.172.182.154/horizon
     volumes:
       - ./srv/horizon/.hz/:/srv/horizon/.hz
       - ./srv/horizon/config/:/srv/horizon/config
@@ -30,7 +30,7 @@ services:
   chateau:
     image: antoinehumbert/chateau:1.0
     environment:
-      - VIRTUAL_HOST=titou2.com
+      - VIRTUAL_HOST=163.172.182.154/chateau
     ports:
       - "3000:3000"
     links:
