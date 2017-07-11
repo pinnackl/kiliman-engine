@@ -55,7 +55,7 @@ auto_create_collection = true
 #start_rethinkdb = true
 
 rdb_host="163.172.182.154"
-rdb_port=29015
+rdb_port=28015
 rdb_user="admin"
 #rdb_password=""
 #rdb_timeout = 60

@@ -2,37 +2,16 @@ version: "2"
 
 services:
   nginx-proxy:
-    image: jwilder/nginx-proxy
+    image: antoinehumbert/nginx-proxy:1.0
     container_name: nginx-proxy
+    network_mode: "host"
     ports:
       - "80:80"
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
   redthinkdb:
     image: rethinkdb:latest
-    environment:
-      - VIRTUAL_HOST=163.172.182.154/rethink
     ports:
       - "8080:8080"
-      - "29015:28015"
-  horizon:
-    image: antoinehumbert/kiliman-horizon:1.0
-    environment:
-      - VIRTUAL_HOST=163.172.182.154/horizon
-    volumes:
-      - ./srv/horizon/.hz/:/srv/horizon/.hz
-      - ./srv/horizon/config/:/srv/horizon/config
-    links:
-      - redthinkdb
-    ports:
-      - "8181:8181"
-    tty: true
-  chateau:
-    image: antoinehumbert/chateau:1.0
-    environment:
-      - VIRTUAL_HOST=163.172.182.154/chateau
-    ports:
-      - "3000:3000"
-    links:
-      - redthinkdb
+      - "28015:28015"
 
