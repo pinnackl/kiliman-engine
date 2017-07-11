@@ -150,8 +150,7 @@ func RunContainerInBackground(imageName string, containerName string, idUser str
 		Image:   imageName,
 		Volumes: volumes,
 		Env: []string{
-			"VIRTUAL_HOST="+containerName,
-			"CONTAINER_NAME="+containerName,
+			"VIRTUAL_HOST="+containerName+".splitweb.fr",
 		},
 	}, &container.HostConfig{
 		Binds: []string{

@@ -2,9 +2,10 @@ version: "2"
 
 services:
   nginx-proxy:
-    image: antoinehumbert/nginx-proxy:1.0
+    image: jwilder/nginx-proxy
     container_name: nginx-proxy
-    network_mode: "host"
+    environment:
+      - DEFAULT_HOST=splitweb.fr
     ports:
       - "80:80"
     volumes:
@@ -14,4 +15,3 @@ services:
     ports:
       - "8080:8080"
       - "28015:28015"
-
