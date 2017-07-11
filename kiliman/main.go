@@ -194,6 +194,9 @@ func CreateDirectoryAndCopyConfFile(containerName string, idUser string, Db_pass
 	directoryHzPath := fmt.Sprintf("%s/.hz", directoryContainerPath)
 	os.Mkdir(directoryHzPath, os.FileMode(0755))
 
+	directoryChateauPath := fmt.Sprintf("%s/chateau", directoryContainerPath)
+	os.Mkdir(directoryChateauPath, os.FileMode(0755))
+
 	directoryConfigPath := fmt.Sprintf("%s/config", directoryContainerPath)
 	os.Mkdir(directoryConfigPath, os.FileMode(0755))
 
@@ -252,6 +255,7 @@ func CreateDirectoryAndCopyConfFile(containerName string, idUser string, Db_pass
 
 	}
 	output = strings.Join(lines, "\n")
+	err = ioutil.WriteFile(directoryChateauPath+"/config.js", []byte(output), 0644)
 	if err != nil {
 		log.Println(err)
 	}

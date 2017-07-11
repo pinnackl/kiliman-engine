@@ -272,24 +272,29 @@ server {
 
 
     {{ range $host, $containers := groupByMulti $ "Env.CONTAINER_NAME" "," }}
-       {{ range $container := $containers }}
-       {{ $containerleng := len  $container.Name }}
-        {{ if eq $containerleng 12 }}
-        location /{{ $container.Name }} {
+        {{ range $container := $containers }}
+            {{ $containerleng := len  $container.Name }}
+            {{ range $knownNetwork := $CurrentContainer.Networks }}
+                {{ range $containerNetwork := $container.Networks }}
 
-                proxy_pass {{ trim $proto }}://{{ $container.Name }}:8181/horizon;
-                proxy_http_version 1.1;
-                proxy_set_header Upgrade $http_upgrade;
-                proxy_set_header Connection "upgrade";
+                   {{ if eq $containerleng 12 }}
+                    location /{{ $container.Name }}/horizon {
 
-            }
+                            proxy_pass {{ trim $proto }}://{{ $containerNetwork.IP }}:8181/horizon;
+                            proxy_http_version 1.1;
+                            proxy_set_header Upgrade $http_upgrade;
+                            proxy_set_header Connection "upgrade";
 
-             location /{{ $container.Name }}/chateau {
+                        }
 
-                    proxy_pass {{ trim $proto }}://{{ $container.Name }}:3000;
+                     location /{{ $container.Name }}/chateau {
 
-                  }
-            {{ end }}
+                            proxy_pass {{ trim $proto }}://{{ $containerNetwork.IP }}:3000;
+
+                          }
+                    {{ end }}
+               {{ end }}
+           {{ end }}
         {{ end }}
     {{ end }}
 
