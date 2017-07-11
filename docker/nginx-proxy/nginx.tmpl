@@ -110,33 +110,6 @@ server {
 {{ $is_regexp := hasPrefix "~" $host }}
 {{ $upstream_name := when $is_regexp (sha1 $host) $host }}
 
-# {{ $host }}
-upstream {{ $upstream_name }} {
-
-{{ range $container := $containers }}
-	{{ $addrLen := len $container.Addresses }}
-
-	{{ range $knownNetwork := $CurrentContainer.Networks }}
-		{{ range $containerNetwork := $container.Networks }}
-			{{ if or (eq $knownNetwork.Name $containerNetwork.Name) (eq $knownNetwork.Name "host") }}
-				## Can be connect with "{{ $containerNetwork.Name }}" network
-
-				{{/* If only 1 port exposed, use that */}}
-				{{ if eq $addrLen 1 }}
-					{{ $address := index $container.Addresses 0 }}
-					{{ template "upstream" (dict "Container" $container "Address" $address "Network" $containerNetwork) }}
-				{{/* If more than one port exposed, use the one matching VIRTUAL_PORT env var, falling back to standard web port 80 */}}
-				{{ else }}
-					{{ $port := coalesce $container.Env.VIRTUAL_PORT "80" }}
-					{{ $address := where $container.Addresses "Port" $port | first }}
-					{{ template "upstream" (dict "Container" $container "Address" $address "Network" $containerNetwork) }}
-				{{ end }}
-			{{ end }}
-		{{ end }}
-	{{ end }}
-{{ end }}
-}
-
 {{ $default_host := or ($.Env.DEFAULT_HOST) "" }}
 {{ $default_server := index (dict $host "" $default_host "default_server") $host }}
 
@@ -236,7 +209,7 @@ server {
 
 {{ $hostleng := len $host }}
 
-{{ if or (not $is_https) (eq $https_method "noredirect") (ne $hostleng 12)}}
+{{ if or (not $is_https) (eq $https_method "noredirect") }}
 
 server {
 	server_name {{ $host }};
@@ -273,7 +246,7 @@ server {
 
     {{ range $host, $containers := groupByMulti $ "Env.CONTAINER_NAME" "," }}
         {{ range $container := $containers }}
-            {{ $containerleng := len  $container.Name }}
+        {{ $containerleng := len  $container.Name }}
             {{ range $knownNetwork := $CurrentContainer.Networks }}
                 {{ range $containerNetwork := $container.Networks }}
 

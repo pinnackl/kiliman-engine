@@ -22,6 +22,7 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+	"github.com/go-kiliman/kiliman/config"
 )
 
 type RequestCustomer struct {
@@ -150,7 +151,7 @@ func RunContainerInBackground(imageName string, containerName string, idUser str
 		Image:   imageName,
 		Volumes: volumes,
 		Env: []string{
-			"VIRTUAL_HOST="+containerName,
+			"VIRTUAL_HOST="+config.CNF["IP_HOST"],
 			"CONTAINER_NAME="+containerName,
 		},
 	}, &container.HostConfig{
