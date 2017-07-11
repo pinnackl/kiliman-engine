@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 	"github.com/go-kiliman/kiliman/config"
+	"errors"
 )
 
 type RequestCustomer struct {
@@ -76,6 +77,14 @@ func CreateContainerEndpoint(w http.ResponseWriter, req *http.Request) {
 
 	defer req.Body.Close()
 
+	err := searchIfUserExist(reqC.Email, 0, 50)
+
+	if err != nil {
+		log.Println("error")
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
 	containerName := utils.RandomPassword(12)
 	log.Println("Container Name : " + containerName)
 	userPasswordDb := utils.RandomPassword(22)
@@ -114,13 +123,25 @@ func CreateContainerEndpoint(w http.ResponseWriter, req *http.Request) {
 		Db_password:    userPasswordDb,
 	}
 
-	go insertInDB(*customer)
+	insertInDB(*customer)
 
 	if err := json.NewEncoder(w).Encode(customer); err != nil {
 		log.Println(err)
 	}
 
+
+	js, err := json.Marshal(customer)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusCreated)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+
+
 	log.Println("Response Send")
+	log.Println(customer)
 }
 
 func RunContainerInBackground(imageName string, containerName string, idUser string, Db_password string) string {
@@ -287,4 +308,52 @@ func insertInDB(customer ResponseCustomer) {
 
 	log.Println("User Inserted in MongoDB")
 
+}
+
+
+func searchIfUserExist ( email string, skip int, limit int) error {
+	searchResults, searchErr := SearchPerson(bson.M{"email": email}, skip, limit)
+
+	if len(searchResults) > 0 {
+		log.Println("User already exist")
+		return errors.New("User already exist")
+	} else {
+		log.Println("User doesn't exist ")
+		return nil
+	}
+	log.Println(searchErr)
+
+	return nil
+}
+
+func SearchPerson (q interface{}, skip int, limit int) (searchResults []Customer, searchErr string) {
+	searchErr     = ""
+	searchResults = []Customer{}
+	query := func(c *mgo.Collection) error {
+		fn := c.Find(q).Skip(skip).Limit(limit).All(&searchResults)
+		if limit < 0 {
+			fn = c.Find(q).Skip(skip).All(&searchResults)
+		}
+		return fn
+	}
+	search := func() error {
+		return withCollection("customer-cms", query)
+	}
+	err := search()
+	if err != nil {
+		searchErr = "Database Error"
+	}
+	return
+}
+
+func withCollection(collection string, s func(*mgo.Collection) error) error {
+	session, err := mgo.Dial("localhost")
+	if err != nil {
+		log.Println(err)
+	}
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+
+	c := session.DB("go-kiliman").C(collection)
+	return s(c)
 }
