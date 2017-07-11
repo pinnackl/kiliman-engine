@@ -84,11 +84,11 @@ func CreateContainerEndpoint(w http.ResponseWriter, req *http.Request) {
 
 	switch reqC.Offer {
 		case "bronze":
-			idContainer = RunContainerInBackground("antoinehumbert/kiliman-horizon:1.0", containerName, reqC.Name, userPasswordDb)
+			idContainer = RunContainerInBackground("antoinehumbert/kiliman-horizon:1.1", containerName, reqC.Name, userPasswordDb)
 		case "silver":
-			idContainer = RunContainerInBackground("antoinehumbert/kiliman-horizon:1.0", containerName, reqC.Name, userPasswordDb)
+			idContainer = RunContainerInBackground("antoinehumbert/kiliman-horizon:1.1", containerName, reqC.Name, userPasswordDb)
 		case "gold":
-			idContainer = RunContainerInBackground("antoinehumbert/kiliman-horizon:1.0", containerName, reqC.Name, userPasswordDb)
+			idContainer = RunContainerInBackground("antoinehumbert/kiliman-horizon:1.1", containerName, reqC.Name, userPasswordDb)
 	}
 
 	cmdStr := "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' " + idContainer
@@ -143,18 +143,21 @@ func RunContainerInBackground(imageName string, containerName string, idUser str
 	volumes := map[string]struct{}{
 		os.Getenv("PWD") + "/srv/" + containerName + "/.hz/config-dev.toml":    {},
 		os.Getenv("PWD") + "/srv/" + containerName + "/config/config-dev.json": {},
+		os.Getenv("PWD") + "/srv/" + containerName + "/config.js": {},
 	}
 
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image:   imageName,
 		Volumes: volumes,
 		Env: []string{
-			"VIRTUAL_HOST=titou3.com",
+			"VIRTUAL_HOST="+containerName,
+			"CONTAINER_NAME="+containerName,
 		},
 	}, &container.HostConfig{
 		Binds: []string{
 			os.Getenv("PWD") + "/srv/" + containerName + "/.hz/config-dev.toml:/srv/horizon/.hz/config-dev.toml",
 			os.Getenv("PWD") + "/srv/" + containerName + "/config/config-dev.json:/srv/horizon/config/config-dev.json",
+			os.Getenv("PWD") + "/srv/" + containerName + "/chateau/config.js:/srv/horizon/config.js",
 		},
 	}, nil, containerName)
 	if err != nil {
@@ -233,6 +236,22 @@ func CreateDirectoryAndCopyConfFile(containerName string, idUser string, Db_pass
 		log.Fatalln(err)
 	}
 
+	input, err = ioutil.ReadFile("templates/chateau/config.js")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	lines = strings.Split(string(input), "\n")
+
+	for i, line := range lines {
+		if strings.Contains(line, "exports.user = ") {
+			lines[i] = "exports.user = '" + idUser + "'"
+		}
+		if strings.Contains(line, "exports.password = ") {
+			lines[i] = "exports.password = '" + Db_password + "'"
+		}
+
+	}
+	output = strings.Join(lines, "\n")
 	if err != nil {
 		log.Println(err)
 	}
