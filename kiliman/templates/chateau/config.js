@@ -1,5 +1,5 @@
 // RethinkDB settings
-exports.host = '192.168.0.11';    // RethinkDB host
+exports.host = '163.172.182.154';    // RethinkDB host
 exports.port = 28015;
 exports.user = 'admin';
 exports.password = '';
