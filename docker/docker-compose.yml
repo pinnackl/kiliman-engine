@@ -16,3 +16,9 @@ services:
     ports:
       - "8080:8080"
       - "28015:28015"
+  chateau:
+    image: antoinehumbert/chateau:1.0
+    ports:
+      - "3000:3000"
+    links:
+      - redthinkdb
