@@ -267,6 +267,18 @@ server {
                             proxy_set_header X-Real-IP $remote_addr;
 
                           }
+
+                          location /{{ $container.Name }}/auth/signup {
+
+                                  proxy_pass {{ trim $proto }}://{{ $containerNetwork.IP }}:8181/auth/signup;
+
+                                }
+
+                         location /{{ $container.Name }}/auth/login {
+
+                                      proxy_pass {{ trim $proto }}://{{ $containerNetwork.IP }}:8181/auth/login;
+
+                            }
                     {{ end }}
                {{ end }}
            {{ end }}
