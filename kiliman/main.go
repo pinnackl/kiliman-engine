@@ -16,14 +16,14 @@ import (
 	"io"
 	"io/ioutil"
 
+	"errors"
+	"github.com/go-kiliman/kiliman/config"
 	"github.com/go-kiliman/kiliman/utils"
 	"net/http"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
-	"github.com/go-kiliman/kiliman/config"
-	"errors"
 )
 
 type RequestCustomer struct {
@@ -93,12 +93,12 @@ func CreateContainerEndpoint(w http.ResponseWriter, req *http.Request) {
 	utils.CreateAndGrantUserInDB(containerName, reqC.Name, userPasswordDb)
 
 	switch reqC.Offer {
-		case "bronze":
-			idContainer = RunContainerInBackground("antoinehumbert/kiliman-horizon:1.1", containerName, reqC.Name, userPasswordDb)
-		case "silver":
-			idContainer = RunContainerInBackground("antoinehumbert/kiliman-horizon:1.1", containerName, reqC.Name, userPasswordDb)
-		case "gold":
-			idContainer = RunContainerInBackground("antoinehumbert/kiliman-horizon:1.1", containerName, reqC.Name, userPasswordDb)
+	case "bronze":
+		idContainer = RunContainerInBackground("antoinehumbert/kiliman-horizon:1.1", containerName, reqC.Name, userPasswordDb)
+	case "silver":
+		idContainer = RunContainerInBackground("antoinehumbert/kiliman-horizon:1.1", containerName, reqC.Name, userPasswordDb)
+	case "gold":
+		idContainer = RunContainerInBackground("antoinehumbert/kiliman-horizon:1.1", containerName, reqC.Name, userPasswordDb)
 	}
 
 	cmdStr := "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' " + idContainer
@@ -111,6 +111,12 @@ func CreateContainerEndpoint(w http.ResponseWriter, req *http.Request) {
 	tmp_name_container := fmt.Sprintf("%s", outName)
 	tmp_containerName := strings.Replace(tmp_name_container, "/", "", 1)
 	containerName = strings.Replace(tmp_containerName, "\n", "", 2)
+
+	cmdHz := "docker exec -ti " + containerName + " hz schema apply --project-name " + containerName + " .hz/schema.toml -c " + config.CNF["IP_HOST"] + ":28015"
+	log.Println("command : " + cmdHz)
+	output, _ := exec.Command("/bin/sh", "-c", cmdHz).Output()
+	log.Println(output)
+
 
 	customer := &ResponseCustomer{
 		Name:           reqC.Name,
@@ -129,7 +135,6 @@ func CreateContainerEndpoint(w http.ResponseWriter, req *http.Request) {
 		log.Println(err)
 	}
 
-
 	js, err := json.Marshal(customer)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusCreated)
@@ -138,7 +143,6 @@ func CreateContainerEndpoint(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
-
 
 	log.Println("Response Send")
 	log.Println(customer)
@@ -165,15 +169,15 @@ func RunContainerInBackground(imageName string, containerName string, idUser str
 	volumes := map[string]struct{}{
 		os.Getenv("PWD") + "/srv/" + containerName + "/.hz/config-dev.toml":    {},
 		os.Getenv("PWD") + "/srv/" + containerName + "/config/config-dev.json": {},
-		os.Getenv("PWD") + "/srv/" + containerName + "/config.js": {},
+		os.Getenv("PWD") + "/srv/" + containerName + "/config.js":              {},
 	}
 
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image:   imageName,
 		Volumes: volumes,
 		Env: []string{
-			"VIRTUAL_HOST="+config.CNF["IP_HOST"],
-			"CONTAINER_NAME="+containerName,
+			"VIRTUAL_HOST=" + config.CNF["IP_HOST"],
+			"CONTAINER_NAME=" + containerName,
 		},
 	}, &container.HostConfig{
 		Binds: []string{
@@ -221,7 +225,6 @@ func CreateDirectoryAndCopyConfFile(containerName string, idUser string, Db_pass
 
 	directoryConfigPath := fmt.Sprintf("%s/config", directoryContainerPath)
 	os.Mkdir(directoryConfigPath, os.FileMode(0755))
-
 
 	configFilePath := fmt.Sprintf("%s/config-dev.json", directoryConfigPath)
 	destConfigFile, err := os.Create(configFilePath) // creates if file doesn't exist
@@ -310,8 +313,7 @@ func insertInDB(customer ResponseCustomer) {
 
 }
 
-
-func searchIfUserExist ( email string, skip int, limit int) error {
+func searchIfUserExist(email string, skip int, limit int) error {
 	searchResults, searchErr := SearchPerson(bson.M{"email": email}, skip, limit)
 
 	if len(searchResults) > 0 {
@@ -326,8 +328,8 @@ func searchIfUserExist ( email string, skip int, limit int) error {
 	return nil
 }
 
-func SearchPerson (q interface{}, skip int, limit int) (searchResults []Customer, searchErr string) {
-	searchErr     = ""
+func SearchPerson(q interface{}, skip int, limit int) (searchResults []Customer, searchErr string) {
+	searchErr = ""
 	searchResults = []Customer{}
 	query := func(c *mgo.Collection) error {
 		fn := c.Find(q).Skip(skip).Limit(limit).All(&searchResults)

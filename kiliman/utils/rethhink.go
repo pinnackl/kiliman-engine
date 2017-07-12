@@ -16,6 +16,7 @@ func CreateAndGrantUserInDB(Db_name string, idUser string, userPassword string) 
 	if err != nil {
 		log.Println(err)
 	}
+	
 
 	log.Printf("%d DB created", resp.DBsCreated)
 
