@@ -18,6 +18,6 @@
 
 ## Example Curl
 
-`curl -H "Content-Type: application/json" -X POST -d  {"name" : "titou","email": "ahv@hotmail.fr","offer": "gold" } http://localhost:12345/new-cms`
+`curl -H "Content-Type: application/json" -X POST -d  {"name" : "titou","email": "XXXXX","offer": "gold" } http://localhost:12345/new-cms`
 
 
